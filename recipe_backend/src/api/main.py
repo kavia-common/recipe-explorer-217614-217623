@@ -30,6 +30,7 @@ app = FastAPI(
 cors_env = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
 allow_origins = [o.strip() for o in cors_env.split(",") if o.strip()]
 
+# CORSMiddleware handles OPTIONS preflight automatically for allowed origins/methods/headers.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
@@ -47,14 +48,31 @@ def on_startup():
     """
     create_all_tables()
 
-@app.get("/", tags=["Health"], summary="Health Check")
-def health_check():
-    """Simple health check endpoint.
+# PUBLIC_INTERFACE
+@app.get("/", tags=["Health"], summary="Root", description="Public root endpoint to verify the API is up.")
+def root():
+    """Public root endpoint for quick connectivity checks.
 
     Returns:
-        JSON object with health message.
+        dict: {"status": "ok", "service": "Recipe Explorer API"}
     """
-    return {"message": "Healthy"}
+    return {"status": "ok", "service": "Recipe Explorer API"}
+
+# PUBLIC_INTERFACE
+@app.get(
+    "/health",
+    tags=["Health"],
+    summary="Health",
+    description="Simple health check endpoint used by frontend and monitors.",
+    responses={200: {"description": "Service is healthy"}},
+)
+def health():
+    """Health check endpoint.
+
+    Returns:
+        dict: {"status": "ok"}
+    """
+    return {"status": "ok"}
 
 # Include routers for all API modules
 # These imports are already resolved above; ensure they are included here.
