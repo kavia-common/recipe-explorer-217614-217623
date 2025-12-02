@@ -4,12 +4,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.db.database import create_all_tables
 from src.api.auth import router as auth_router
 from src.api.users import router as users_router
+from src.api.recipes import router as recipes_router
 
 openapi_tags = [
     {"name": "Health", "description": "Health and diagnostics"},
     {"name": "Auth", "description": "Authentication and authorization"},
     {"name": "Users", "description": "User management"},
     {"name": "Saved Recipes", "description": "Save and manage favorite recipes"},
+    {"name": "Recipes", "description": "Recipe search and details from Spoonacular"},
 ]
 
 app = FastAPI(
@@ -48,3 +50,4 @@ def health_check():
 # Include routers
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(recipes_router)
