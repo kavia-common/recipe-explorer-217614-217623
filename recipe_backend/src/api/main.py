@@ -26,6 +26,7 @@ app = FastAPI(
 
 # Configure CORS using environment variable CORS_ALLOWED_ORIGINS
 # Comma-separated origins, e.g. "http://localhost:3000,https://example.com"
+# Defaults to "http://localhost:3000" for local development to work with the React frontend.
 cors_env = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
 allow_origins = [o.strip() for o in cors_env.split(",") if o.strip()]
 

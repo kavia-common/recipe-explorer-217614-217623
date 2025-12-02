@@ -60,13 +60,17 @@ def search_recipes(
         )
         return data
     except SpoonacularAuthError as ae:
-        raise HTTPException(status_code=401, detail=str(ae)) from ae
+        # Provide a standardized JSON error for missing/invalid API key
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized: missing or invalid Spoonacular API key. Please set SPOONACULAR_API_KEY in backend .env.",
+        ) from ae
     except SpoonacularServiceError as se:
-        # Treat service errors as upstream issues
-        raise HTTPException(status_code=502, detail=str(se)) from se
+        # Treat service errors as upstream issues and expose concise message
+        raise HTTPException(status_code=502, detail=f"Spoonacular error: {se}") from se
     except Exception as e:
         # Unexpected errors
-        raise HTTPException(status_code=502, detail=f"Unexpected error: {e}") from e
+        raise HTTPException(status_code=502, detail=f"Unexpected error contacting Spoonacular: {e}") from e
 
 
 @router.get(
@@ -104,10 +108,13 @@ def get_recipe_details(
             raise HTTPException(status_code=404, detail="Recipe not found")
         return data
     except SpoonacularAuthError as ae:
-        raise HTTPException(status_code=401, detail=str(ae)) from ae
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized: missing or invalid Spoonacular API key. Please set SPOONACULAR_API_KEY in backend .env.",
+        ) from ae
     except SpoonacularServiceError as se:
         # In case Spoonacular returns 404 internally we would have raised above only on empty,
         # but here we generalize service errors to 502.
-        raise HTTPException(status_code=502, detail=str(se)) from se
+        raise HTTPException(status_code=502, detail=f"Spoonacular error: {se}") from se
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Unexpected error: {e}") from e
+        raise HTTPException(status_code=502, detail=f"Unexpected error contacting Spoonacular: {e}") from e
