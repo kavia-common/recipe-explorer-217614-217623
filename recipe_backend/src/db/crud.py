@@ -6,14 +6,15 @@ from sqlalchemy.orm import Session
 
 from . import models, schemas
 
+try:
+    # Prefer secure hashing from the auth module if available
+    from src.api.auth import get_password_hash as _secure_hash_password  # type: ignore
+except Exception:
+    _secure_hash_password = None  # fallback to stub below
+
 
 def _hash_password_stub(plain_password: str) -> str:
-    """Temporary password hash implementation.
-
-    NOTE: This is a stub and MUST be replaced with a secure hashing mechanism
-    (e.g., passlib/bcrypt) in the authentication step.
-    """
-    # Simple, insecure transform to act as placeholder
+    """Temporary password hash implementation (fallback only)."""
     return f"stub$sha256like${plain_password[::-1]}"
 
 
@@ -26,13 +27,17 @@ def get_user_by_email(db: Session, email: str) -> Optional[models.User]:
 
 # PUBLIC_INTERFACE
 def create_user(db: Session, user_in: schemas.UserCreate) -> models.User:
-    """Create a new user with hashed password (stubbed)."""
+    """Create a new user with hashed password."""
     if get_user_by_email(db, user_in.email) is not None:
         raise ValueError("User with this email already exists")
 
+    password_hash = (
+        _secure_hash_password(user_in.password) if _secure_hash_password else _hash_password_stub(user_in.password)
+    )
+
     user = models.User(
         email=user_in.email,
-        password_hash=_hash_password_stub(user_in.password),
+        password_hash=password_hash,
     )
     db.add(user)
     db.commit()

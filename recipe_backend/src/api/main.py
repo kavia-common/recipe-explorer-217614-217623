@@ -2,9 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.db.database import create_all_tables
+from src.api.auth import router as auth_router
+from src.api.users import router as users_router
 
 openapi_tags = [
     {"name": "Health", "description": "Health and diagnostics"},
+    {"name": "Auth", "description": "Authentication and authorization"},
     {"name": "Users", "description": "User management"},
     {"name": "Saved Recipes", "description": "Save and manage favorite recipes"},
 ]
@@ -40,3 +43,8 @@ def health_check():
         JSON object with health message.
     """
     return {"message": "Healthy"}
+
+
+# Include routers
+app.include_router(auth_router)
+app.include_router(users_router)
